@@ -1,0 +1,764 @@
+---
+import { getSiteSettings, getMenu, getSection, getEmDashCollection } from "emdash";
+import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
+import { createPublicPageContext } from "emdash/page";
+
+export const prerender = false;
+
+const settings = await getSiteSettings();
+const phone = (settings as any)?.phone ?? '319.360.5541';
+const phoneUrl = `tel:${phone.replace(/\D/g, '')}`;
+const email = (settings as any)?.email ?? 'hello@cedarrapidswebdesign.com';
+
+const menu = await getMenu("primary");
+
+// Sections (editable slide copy)
+const sectionServices = await getSection("slide-services");
+const sectionContact = await getSection("slide-contact");
+
+// Collections
+const { entries: portfolioEntries } = await getEmDashCollection("portfolio", { status: "published", limit: 20 });
+const portfolioItems = [...(portfolioEntries ?? [])].sort((a: any, b: any) => (a.data?.order ?? 99) - (b.data?.order ?? 99));
+
+const { entries: teamEntries } = await getEmDashCollection("team_members", { status: "published", limit: 20 });
+const teamMembers = [...(teamEntries ?? [])].sort((a: any, b: any) => (a.data?.order ?? 99) - (b.data?.order ?? 99));
+
+const { entries: serviceEntries } = await getEmDashCollection("services", { status: "published", limit: 20 });
+const serviceItems = [...(serviceEntries ?? [])].sort((a: any, b: any) => (a.data?.order ?? 99) - (b.data?.order ?? 99));
+
+const { entries: slideEntries } = await getEmDashCollection("slides", { status: "published", limit: 20 });
+const videoSlides = [...(slideEntries ?? [])].sort((a: any, b: any) => (a.data?.order ?? 99) - (b.data?.order ?? 99));
+
+// Page context for EmDash live editing toolbar
+const page = createPublicPageContext({
+  Astro,
+  kind: "custom",
+  pageType: "website",
+  title: (settings as any)?.title ?? "Cedar Rapids Web Design",
+  description: (settings as any)?.tagline ?? null,
+});
+
+// Helper to get media URL from EmDash media field
+function mediaUrl(field: any): string | null {
+  if (!field) return null;
+  // String - already a URL or storage key
+  if (typeof field === 'string') {
+    try {
+      const parsed = JSON.parse(field);
+      return mediaUrl(parsed);
+    } catch {
+      return field.startsWith('http') ? field : `/_emdash/api/media/file/${field}`;
+    }
+  }
+  // EmDash local provider format
+  if (field.meta?.storageKey) return `/_emdash/api/media/file/${field.meta.storageKey}`;
+  if (field.storageKey) return `/_emdash/api/media/file/${field.storageKey}`;
+  // External provider
+  if (field.src) return field.src;
+  if (field.url) return field.url;
+  // Nested provider object
+  if (field.provider === 'local' && field.id && field.filename) {
+    const ext = field.filename.split('.').pop();
+    return `/_emdash/api/media/file/${field.id}.${ext}`;
+  }
+  return null;
+}
+
+// Helper to render portable text as simple HTML
+function renderPT(blocks: any[]): string {
+  if (!Array.isArray(blocks)) return '';
+  return blocks.map((block: any) => {
+    if (block._type !== 'block') return '';
+    const text = (block.children ?? []).map((c: any) => c.text ?? '').join('');
+    if (block.style === 'h2') return `<h2 class="slide__heading">${text}</h2>`;
+    if (block.style === 'h3') return `<h3>${text}</h3>`;
+    return `<p class="slide__lede">${text}</p>`;
+  }).join('');
+}
+
+// Service icon SVGs by index (cycle through)
+const serviceIcons = [
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>`,
+];
+
+const SLIDE_IDS = ['hero', ...videoSlides.map((s: any) => s.data?.anchor ?? s.slug), 'services', 'portfolio', 'team', 'contact-us'];
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="shortcut icon" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{(settings as any)?.title ?? 'Cedar Rapids Web Design'}</title>
+  <meta name="description" content={(settings as any)?.tagline ?? 'Professional web design and development in Cedar Rapids, Iowa.'} />
+  <!-- Self-hosted Roboto font -->
+  <link rel="preload" href="/fonts/roboto.woff2" as="font" type="font/woff2" crossorigin />
+  <style>
+    @font-face {
+      font-family: 'Roboto';
+      src: url('/fonts/roboto.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    body { font-family: 'Roboto', system-ui, -apple-system, sans-serif; }
+  </style>
+  <EmDashHead page={page} />
+</head>
+<body>
+  <EmDashBodyStart page={page} />
+
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="header-logo">
+        <img src="/assets/images/Cedar-Rapids-Web-Design_Logo_300x40.svg" alt={(settings as any)?.title ?? 'Cedar Rapids Web Design'} width="300" height="40" />
+      </a>
+      <nav class="nav" id="nav">
+        <ul class="nav__list">
+          {menu?.items.map((item: any) => (
+            <li class={item.children?.length ? 'has-dropdown' : ''}>
+              <a href={item.url} class="nav__link">{item.label}{item.children?.length ? ' ▾' : ''}</a>
+              {item.children?.length > 0 && (
+                <ul class="nav__dropdown">
+                  {item.children.map((child: any) => (
+                    <li><a href={child.url} class="nav__link">{child.label}</a></li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <button class="burger" id="burger" aria-label="Open Navigation" aria-expanded="false">
+        <span class="burger__lines"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── SLIDESHOW WRAPPER ── -->
+  <div class="slideshow" id="slideshow">
+
+    <!-- HERO -->
+    <section class="slide slide--hero" id="hero">
+      <video autoplay loop muted playsinline preload="auto" class="slide-video" poster="/assets/images/hero-poster.jpg">
+        <source src="/assets/video/Cedar-Rapids-Web-Design_Hero_Video.mp4" type="video/mp4" />
+      </video>
+      <div class="slide-video-placeholder"></div>
+      <div class="slide__content hero__content">
+        <figure class="hero-logo-figure">
+          <img src="/assets/images/Cedar-Rapids-Web-Design_Logo_500-1.svg" alt={(settings as any)?.title ?? 'Cedar Rapids Web Design'} class="hero__logo" fetchpriority="high" width="500" height="228" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- VIDEO SLIDES (from CMS) -->
+    {videoSlides.map((slide: any) => {
+      const anchor = slide.data?.anchor ?? slide.slug;
+      const overlayClass = slide.data?.overlay === 'light' ? 'slide-video-placeholder--light' : 'slide-video-placeholder--dark';
+      const isDark = slide.data?.text_color === 'dark';
+      return (
+        <section class={`slide slide--video${isDark ? ' slide--video-light' : ''}`} id={anchor} {...(slide as any).edit}>
+          {slide.data?.video_file && (
+            <video autoplay loop muted playsinline preload="auto" class="slide-video">
+              <source src={`/assets/video/${slide.data.video_file}`} type="video/mp4" />
+            </video>
+          )}
+          <div class={`slide-video-placeholder ${overlayClass}`}></div>
+          <div class={`slide__content${isDark ? ' slide__content--dark' : ''}`}>
+            {slide.data?.heading && <h2 class="slide__heading" {...(slide as any).edit?.heading}>{slide.data.heading}</h2>}
+            {slide.data?.body && <p class="slide__lede" {...(slide as any).edit?.body}>{slide.data.body}</p>}
+            {slide.data?.cta_label && slide.data?.cta_url && (
+              <div class="slide__ctas">
+                <a href={slide.data.cta_url} class={`btn ${isDark ? 'btn--outline-dark' : 'btn--outline'}`}>
+                  {slide.data.cta_label}
+                </a>
+              </div>
+            )}
+          </div>
+        </section>
+      );
+    })}
+
+    <!-- SERVICES -->
+    <section class="slide slide--services" id="services">
+      <div class="slide__content slide__content--services">
+        <div class="services-header">
+          <Fragment set:html={renderPT(sectionServices?.content ?? [])} />
+        </div>
+        <div class="services-grid">
+          {serviceItems.map((svc: any, i: number) => (
+            <article class="service-card" tabindex="0" {...(svc as any).edit}>
+              <div class="service-icon-box" set:html={serviceIcons[i % serviceIcons.length]}></div>
+              <h3 class="service-card__heading" {...(svc as any).edit?.title}>{svc.data?.title}</h3>
+              <p class="service-card__desc" {...(svc as any).edit?.description}>{svc.data?.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section class="slide slide--portfolio" id="portfolio">
+      <div class="slide__content--dark slide__content--portfolio">
+        <div class="portfolio-header">
+          <h2 class="slide__heading">Portfolio</h2>
+        </div>
+        <div class="portfolio-grid">
+          {portfolioItems.map((item: any) => {
+            const imgUrl = mediaUrl(item.data?.screenshot);
+            return (
+              <a href={item.data?.url} target="_blank" rel="noopener" class="portfolio-card" {...(item as any).edit}>
+                {imgUrl && (
+                  <img src={imgUrl} alt={item.data?.title} class="portfolio-card__img" loading="lazy" decoding="async" width="414" height="198" {...(item as any).edit?.screenshot} />
+                )}
+                <div class="portfolio-card__overlay" {...(item as any).edit?.title}>Visit {item.data?.title}</div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="slide slide--team" id="team">
+      <div class="slide__content slide__content--team">
+        <div class="team-header"><h2 class="slide__heading">Meet the Team</h2></div>
+        <div class="team-grid">
+          {teamMembers.map((member: any) => {
+            const photoUrl = mediaUrl(member.data?.photo);
+            return (
+              <div class="team-card" {...(member as any).edit}>
+                <div class="team-card__header">
+                  {photoUrl && <img src={photoUrl} alt={member.data?.name} class="team-card__photo" {...(member as any).edit?.photo} />}
+                  <div class="team-card__info">
+                    <h3 class="team-card__name" {...(member as any).edit?.name}>{member.data?.name}</h3>
+                    <p class="team-card__title" {...(member as any).edit?.title}>{member.data?.title}</p>
+                    <div class="team-card__socials">
+                      {member.data?.twitter_url && (
+                        <a href={member.data.twitter_url} class="team-social" aria-label="Twitter" target="_blank" rel="noopener">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z"/></svg>
+                        </a>
+                      )}
+                      {member.data?.facebook_url && (
+                        <a href={member.data.facebook_url} class="team-social" aria-label="Facebook" target="_blank" rel="noopener">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor"><path d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"/></svg>
+                        </a>
+                      )}
+                      {member.data?.linkedin_url && (
+                        <a href={member.data.linkedin_url} class="team-social" aria-label="LinkedIn" target="_blank" rel="noopener">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div class="team-card__bio">
+                  {Array.isArray(member.data?.bio) && member.data.bio.map((block: any) => {
+                    if (block._type !== 'block') return null;
+                    const text = (block.children ?? []).map((c: any) => c.text ?? '').join('');
+                    return <p>{text}</p>;
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="slide slide--contact" id="contact-us">
+      <div class="slide__content slide__content--contact">
+        <div class="contact-text">
+          <Fragment set:html={renderPT(sectionContact?.content ?? [])} />
+          <a href={phoneUrl} class="contact__phone">{phone}</a>
+        </div>
+        <form class="contact-form" id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Name <span class="required">*</span></label>
+              <input type="text" id="name" name="name" required placeholder="Your name" />
+            </div>
+            <div class="form-group">
+              <label for="email">Email <span class="required">*</span></label>
+              <input type="email" id="email" name="email" required placeholder="your@email.com" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="phone-field">Phone</label>
+            <input type="tel" id="phone-field" name="phone" placeholder="319-555-0100" />
+          </div>
+          <div class="form-group">
+            <label for="message">Tell us about your project <span class="required">*</span></label>
+            <textarea id="message" name="message" rows="5" required placeholder="Describe your project..."></textarea>
+          </div>
+          <button type="submit" class="btn btn--solid" id="contactSubmit">Send Message</button>
+          <p id="contactSuccess" style="display:none;color:#4caf50;margin-top:0.75rem;font-weight:600;">✓ Message sent! We'll be in touch soon.</p>
+          <p id="contactError" style="display:none;color:#e63946;margin-top:0.75rem;font-weight:600;">Something went wrong. Please try again or email us directly.</p>
+        </form>
+      </div>
+      <div class="contact-footer-bar">
+        <span>© 2026 {(settings as any)?.title ?? 'Cedar Rapids Web Design'} · Cedar Rapids, Iowa</span>
+        <span><a href={phoneUrl}>{phone}</a> · <a href={`mailto:${email}`}>{email}</a></span>
+      </div>
+    </section>
+
+  </div><!-- end .slideshow -->
+
+  <!-- ── MOBILE ARROWS ── -->
+  <div class="mobile-arrows">
+    <button class="mobile-arrow" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+    <button class="mobile-arrow" id="nextBtn" aria-label="Next slide">&#8594;</button>
+  </div>
+
+  <!-- ── SLIDE IDS (server → client) ── -->
+  <script is:inline define:vars={{ SLIDE_IDS_DATA: SLIDE_IDS }}>
+    window.__SLIDE_IDS__ = SLIDE_IDS_DATA;
+  </script>
+
+  <!-- ── SLIDE DOTS ── -->
+  <nav class="slide-dots" id="slideDots" aria-label="Slide navigation">
+    {SLIDE_IDS.map((_id, i) => (
+      <button class={`dot${i === 0 ? ' dot--active' : ''}`} data-slide={i} aria-label={`Go to slide ${i + 1}`} aria-pressed={i === 0 ? "true" : "false"}></button>
+    ))}
+  </nav>
+
+  <EmDashBodyEnd page={page} />
+</body>
+</html>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; background: #000; color: #fff; }
+
+  /* ── HEADER ── */
+  .header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 2rem;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+  }
+  .header-container {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; height: 70px;
+  }
+  .header-logo img { height: 32px; width: auto; display: block; }
+  .nav__list { list-style: none; display: flex; gap: 2rem; }
+  .nav__list li { position: relative; }
+  .nav__link {
+    color: #222; text-decoration: none; font-size: 0.85rem; font-weight: 500;
+    letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.2s;
+  }
+  .nav__link:hover { color: #e63946; }
+  /* Dropdown */
+  .nav__dropdown {
+    display: none; position: absolute; top: 100%; left: 0;
+    background: #fff; list-style: none; padding: 0.5rem 0;
+    min-width: 160px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    border-radius: 4px; z-index: 200;
+  }
+  .nav__dropdown li a { display: block; padding: 0.5rem 1.25rem; white-space: nowrap; }
+  .has-dropdown:hover .nav__dropdown,
+  .has-dropdown:focus-within .nav__dropdown { display: block; }
+  .burger { display: none; flex-direction: column; justify-content: center; gap: 5px; width: 36px; height: 36px; cursor: pointer; background: none; border: none; }
+  .burger__lines,
+  .burger__lines::before,
+  .burger__lines::after {
+    display: block; width: 24px; height: 2px; background: #222;
+    transition: transform 0.3s, opacity 0.3s; position: relative;
+  }
+  .burger__lines::before, .burger__lines::after { content: ''; position: absolute; left: 0; }
+  .burger__lines::before { top: -7px; }
+  .burger__lines::after { top: 7px; }
+  .burger[aria-expanded="true"] .burger__lines { background: transparent; }
+  .burger[aria-expanded="true"] .burger__lines::before { transform: rotate(45deg) translate(5px, 5px); }
+  .burger[aria-expanded="true"] .burger__lines::after { transform: rotate(-45deg) translate(5px, -5px); }
+
+  /* ── SLIDESHOW ── */
+  .slideshow { position: fixed; inset: 0; width: 100vw; height: 100vh; }
+
+  /* ── SLIDES ── */
+  .slide {
+    position: absolute; inset: 0; width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow-y: auto; overflow-x: hidden;
+    padding-top: 70px; padding-inline: 30px;
+    isolation: isolate; opacity: 0; pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .slide.slide--active { opacity: 1; pointer-events: all; }
+  /* First slide visible before JS loads */
+  .slide:first-of-type { opacity: 1; pointer-events: all; }
+  .slide:first-of-type.slide--inactive { opacity: 0; pointer-events: none; }
+
+  .slide-video {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+  }
+  .slide-video-placeholder {
+    position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.45); pointer-events: none;
+  }
+  .slide-video-placeholder--dark { background: rgba(0,0,0,0.55); }
+  .slide-video-placeholder--light { background: #ffffffd4; }
+
+  .slide__content {
+    position: relative; z-index: 10; max-width: 900px; width: 100%;
+    padding: 2rem; text-align: center; color: #fff;
+  }
+  .slide__content.hero__content { display: flex; flex-direction: column; align-items: center; }
+  .hero-logo-figure { width: 90%; max-width: 600px; }
+  .slide__content--dark { color: #111; }
+  .slide__heading {
+    font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem;
+    letter-spacing: -0.01em; text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .slide__content--dark .slide__heading { text-shadow: none; }
+  .slide__lede {
+    font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 600; line-height: 1.6;
+    max-width: 600px; margin: 0 auto 2rem; opacity: 0.92;
+  }
+  .slide--hero { background: #0a0a14; }
+  .slide--consultation, .slide--mobile-friendly, .slide--video { background: #1a3a5c; }
+  .slide--video-light { background: #e8e8e8; }
+  .slide--seo { background: #e8e8e8; }
+  .hero__logo { width: 100%; }
+
+  /* CTAs */
+  .slide__ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+  .btn {
+    display: inline-block; padding: 0.75rem 2rem; font-size: 0.9rem; font-weight: 500;
+    letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none;
+    border-radius: 2px; transition: background 0.2s, color 0.2s, border-color 0.2s; cursor: pointer;
+  }
+  .btn--outline { background: transparent; border: 2px solid #fff; color: #fff; }
+  .btn--outline:hover { background: #fff; color: #111; }
+  .btn--outline-dark { background: transparent; border: 2px solid #111; color: #111; }
+  .btn--outline-dark:hover { background: #111; color: #fff; }
+  .btn--solid { background: #e63946; border: 2px solid #e63946; color: #fff; font-family: 'Roboto', sans-serif; }
+  .btn--solid:hover { background: #c1121f; border-color: #c1121f; }
+
+  /* ── SERVICES ── */
+  .slide--services { background: #111; align-items: flex-start; padding-top: 90px; padding-bottom: 2rem; }
+  .slide__content--services { z-index: 10; max-width: 1100px; text-align: left; width: 100%; position: relative; }
+  .services-header { margin-bottom: 2rem; text-align: center; }
+  .services-header .slide__lede { margin-bottom: 0; }
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+  .service-card {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 2rem; text-align: left;
+    transition: background 0.2s, border-color 0.2s; cursor: default;
+  }
+  .service-card:hover, .service-card:focus-visible {
+    background: rgba(255,255,255,0.12); border-color: rgba(230,57,70,0.5); outline: none;
+  }
+  .service-icon-box {
+    width: 48px; height: 48px; border-radius: 10px; background: rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;
+    color: rgba(255,255,255,0.7); transition: color 0.2s;
+  }
+  .service-card:hover .service-icon-box { color: #e63946; }
+  .service-card__heading { font-size: 1rem; font-weight: 600; margin-bottom: 0.6rem; color: #fff; }
+  .service-card__desc { font-size: 0.88rem; line-height: 1.7; color: rgba(255,255,255,0.65); }
+
+  /* ── PORTFOLIO ── */
+  .slide--portfolio { background: white; align-items: center; padding-top: 90px; padding-bottom: 2rem; }
+  .slide__content--portfolio { max-width: 1100px; width: 100%; position: relative; z-index: 10; }
+  .portfolio-header { text-align: center; margin-bottom: 2rem; }
+  .portfolio-header .slide__heading { color: #111; text-shadow: none; }
+  .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .portfolio-card {
+    position: relative; overflow: hidden; border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: block; aspect-ratio: 16/9;
+  }
+  .portfolio-card__img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+  .portfolio-card:hover .portfolio-card__img { transform: scale(1.05); }
+  .portfolio-card__overlay {
+    position: absolute; inset: 0; background: rgba(230,57,70,0.85); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    opacity: 0; transition: opacity 0.3s; text-align: center; padding: 1rem;
+  }
+  .portfolio-card:hover .portfolio-card__overlay { opacity: 1; }
+
+  /* ── TEAM ── */
+  .slide--team { background: #f8f8f8; align-items: center; padding-top: 90px; padding-bottom: 2rem; }
+  .slide__content--team { color: #111; max-width: 1000px; width: 100%; position: relative; z-index: 10; }
+  .team-header { text-align: center; margin-bottom: 2rem; }
+  .slide--team .slide__heading { color: #111; text-shadow: none; }
+  .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .team-card { background: #fff; border-radius: 6px; padding: 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .team-card__header { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.25rem; }
+  .team-card__photo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .team-card__name { font-size: 1.2rem; font-weight: 700; color: #111; margin-bottom: 0.2rem; text-align: left; }
+  .team-card__title { font-size: 0.85rem; color: #666; margin-bottom: 0.6rem; text-align: left; }
+  .team-card__socials { display: flex; gap: 0.75rem; }
+  .team-social { color: #444; font-size: 1rem; text-decoration: none; transition: color 0.2s; }
+  .team-social:hover { color: #e63946; }
+  .team-card__bio { font-size: 0.88rem; line-height: 1.7; color: #444; text-align: left; }
+  .team-card__bio p + p { margin-top: 0.75rem; }
+  .team-card__bio a { color: #e63946; text-decoration: none; }
+  .team-card__bio a:hover { text-decoration: underline; }
+
+  /* ── CONTACT ── */
+  .slide--contact { background: #1a1a2e; align-items: center; padding-top: 90px; padding-bottom: 2rem; }
+  .slide--contact .slide__heading { text-shadow: none; }
+  .slide--contact .slide__lede { font-size: 0.9rem; line-height: 1.7; opacity: 0.8; margin-bottom: 0.75rem; max-width: none; font-weight: 400; }
+  .contact-footer-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 1rem 2rem; background: rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.75rem; color: rgba(255,255,255,0.4); font-family: 'Roboto', sans-serif; z-index: 10;
+  }
+  .contact-footer-bar a { color: rgba(255,255,255,0.5); text-decoration: none; }
+  .contact-footer-bar a:hover { color: #e63946; }
+  .slide__content--contact {
+    max-width: 1000px; display: grid; grid-template-columns: 1fr 1.4fr;
+    gap: 3rem; align-items: start; text-align: left;
+  }
+  .contact__phone {
+    display: inline-block; margin-top: 1rem; font-size: 1.5rem; font-weight: 700;
+    color: #e63946; text-decoration: none; letter-spacing: 0.02em;
+  }
+  .contact__phone:hover { color: #ff6b6b; }
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.8; }
+  .required { color: #e63946; }
+  .form-group input, .form-group textarea {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px; padding: 0.65rem 0.9rem; color: #fff;
+    font-size: 0.9rem; font-family: 'Roboto', sans-serif; transition: border-color 0.2s; resize: vertical;
+  }
+  .form-group input::placeholder, .form-group textarea::placeholder { opacity: 0.4; }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #e63946; }
+
+  /* ── SLIDE DOTS ── */
+  .slide-dots {
+    position: fixed; right: 1.5rem; top: 50%; transform: translateY(-50%);
+    z-index: 200; display: flex; flex-direction: column; gap: 0.5rem;
+    background-color: #000; padding: .35rem; border-radius: 7px;
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.8);
+    border: none; cursor: pointer; padding: 0; transition: background 0.3s, transform 0.2s;
+  }
+  .dot:hover { background: rgba(255,255,255,0.7); }
+  .dot--active { background: #e63946; transform: scale(1.3); }
+
+  /* ── MOBILE ARROWS ── */
+  .mobile-arrows {
+    display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    z-index: 200; gap: 1rem;
+  }
+  .mobile-arrow {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+    width: 48px; height: 48px; border-radius: 50%; font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s;
+  }
+  .mobile-arrow:hover { background: rgba(230,57,70,0.7); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .slide--portfolio, .slide--team, .slide--contact { align-items: flex-start; }
+    .mobile-arrows { display: flex; }
+    .nav {
+      position: fixed; top: 70px; left: 0; right: 0; background: #fff;
+      padding: 1.5rem 2rem; transform: translateY(calc(-100% - 70px));
+      transition: transform 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 99;
+    }
+    .nav.nav--open { transform: translateY(0); }
+    .nav__list { flex-direction: column; gap: 1.25rem; }
+    /* Mobile dropdown — show inline, no absolute positioning */
+    .nav__dropdown {
+      display: none; position: static; box-shadow: none;
+      padding: 0.25rem 0 0.25rem 1rem; border-left: 2px solid #e63946;
+    }
+    .has-dropdown.open .nav__dropdown { display: block; }
+    .burger { display: flex; }
+    .services-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .portfolio-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .team-grid { grid-template-columns: 1fr; }
+    .slide__content--contact { grid-template-columns: 1fr; gap: 2rem; }
+    .slide--contact { padding-bottom: 2rem; flex-direction: column; justify-content: flex-start; }
+    .contact-footer-bar { position: relative; bottom: auto; left: auto; right: auto; width: 100%; margin-top: auto; padding: 1rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .slide-dots { display: none; }
+    .slide { height: auto; min-height: 100vh; overflow-y: auto; overflow-x: hidden; position: absolute; -webkit-overflow-scrolling: touch; }
+  }
+</style>
+
+<script is:inline>
+  const SLIDE_IDS = window.__SLIDE_IDS__ ?? ['hero','consultation','mobile-friendly','seo','services','portfolio','team','contact-us'];
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dots = Array.from(document.querySelectorAll('.dot'));
+  let current = 0;
+  let isAnimating = false;
+  const SLIDE_COUNT = slides.length;
+
+  slides[0]?.classList.add('slide--active');
+  slides.forEach((slide, i) => { if (i !== 0) { slide.setAttribute('inert', ''); slide.classList.add('slide--inactive'); } });
+
+  function goTo(index) {
+    if (isAnimating || index === current) return;
+    isAnimating = true;
+    const prevSlide = slides[current];
+    const goingBack = index < current;
+    prevSlide?.classList.remove('slide--active');
+    prevSlide?.classList.add('slide--inactive');
+    prevSlide?.setAttribute('inert', '');
+    current = Math.max(0, Math.min(index, SLIDE_COUNT - 1));
+    const nextSlide = slides[current];
+    nextSlide?.classList.add('slide--active');
+    nextSlide?.classList.remove('slide--inactive');
+    nextSlide?.removeAttribute('inert');
+    if (goingBack) { nextSlide.scrollTop = nextSlide.scrollHeight; }
+    else { nextSlide.scrollTop = 0; }
+    dots.forEach((d, i) => {
+      d.classList.toggle('dot--active', i === current);
+      d.setAttribute('aria-pressed', String(i === current));
+    });
+    setTimeout(() => { isAnimating = false; }, 650);
+  }
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => goTo(Number(dot.dataset.slide)));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  });
+
+  const BUFFER = 60;
+  const SCROLL_END_DELAY = 150;
+  const SNAP_DURATION = 900;
+  let overscroll = 0;
+  let isSnapping = false;
+  let scrollEndTimer = null;
+
+  function getActiveEl() { return slides[current]; }
+  function atBottom(el) { return el.scrollTop + el.clientHeight >= el.scrollHeight - 2; }
+  function atTop(el) { return el.scrollTop <= 0; }
+  function resetOverscroll() { overscroll = 0; if (scrollEndTimer) clearTimeout(scrollEndTimer); scrollEndTimer = null; }
+  function snapBack() {
+    const el = getActiveEl();
+    isSnapping = true;
+    if (overscroll > 0) { el.scrollTop = el.scrollHeight - el.clientHeight; } else { el.scrollTop = 0; }
+    setTimeout(() => { isSnapping = false; }, 400);
+  }
+
+  function handleWheel(e) {
+    e.preventDefault();
+    if (isSnapping || isAnimating) return;
+    const direction = Math.sign(e.deltaY);
+    const el = getActiveEl();
+    const bottom = atBottom(el);
+    const top = atTop(el);
+    if ((direction > 0 && !bottom) || (direction < 0 && !top)) {
+      el.scrollTop += e.deltaY; resetOverscroll(); return;
+    }
+    overscroll += e.deltaY;
+    const absOver = Math.abs(overscroll);
+    const overDir = Math.sign(overscroll);
+    if (absOver >= BUFFER && overDir === direction) {
+      const next = current + direction;
+      if (next >= 0 && next < SLIDE_COUNT) {
+        resetOverscroll(); isSnapping = true; goTo(next);
+        setTimeout(() => { isSnapping = false; }, SNAP_DURATION);
+      } else { snapBack(); resetOverscroll(); }
+    } else {
+      if (scrollEndTimer) clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(() => {
+        if (Math.abs(overscroll) < BUFFER) snapBack();
+        resetOverscroll();
+      }, SCROLL_END_DELAY);
+    }
+  }
+
+  window.addEventListener('wheel', handleWheel, { passive: false });
+
+  let touchStartX = 0, touchStartY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (isSnapping || isAnimating) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const el = getActiveEl();
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 80) {
+      if (dy < 0 && atBottom(el)) goTo(current + 1);
+      if (dy > 0 && atTop(el)) goTo(current - 1);
+    }
+  }, { passive: true });
+
+  // Nav anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const hash = (a.getAttribute('href') ?? '').replace('#', '');
+      const idx = SLIDE_IDS.indexOf(hash);
+      if (idx !== -1) {
+        e.preventDefault();
+        goTo(idx);
+        document.getElementById('nav')?.classList.remove('nav--open');
+        document.getElementById('burger')?.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
+  document.getElementById('prevBtn')?.addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn')?.addEventListener('click', () => goTo(current + 1));
+
+  // Contact form
+  document.getElementById('contactForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const btn = document.getElementById('contactSubmit');
+    const success = document.getElementById('contactSuccess');
+    const error = document.getElementById('contactError');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    success.style.display = 'none'; error.style.display = 'none';
+    try {
+      const res = await fetch('/api/contact', { method: 'POST', body: new FormData(form) });
+      const json = await res.json();
+      if (json.success) { success.style.display = 'block'; form.reset(); }
+      else { error.style.display = 'block'; }
+    } catch { error.style.display = 'block'; }
+    finally { btn.disabled = false; btn.textContent = 'Send Message'; }
+  });
+
+  // Burger
+  const burger = document.getElementById('burger');
+  const nav = document.getElementById('nav');
+  burger?.addEventListener('click', () => {
+    const isOpen = burger.getAttribute('aria-expanded') === 'true';
+    burger.setAttribute('aria-expanded', String(!isOpen));
+    nav.classList.toggle('nav--open', !isOpen);
+  });
+
+  // Mobile: tap on a has-dropdown item toggles the submenu
+  document.querySelectorAll('.has-dropdown > .nav__link').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      // Only intercept on mobile (burger visible)
+      if (window.getComputedStyle(burger).display === 'none') return;
+      e.preventDefault();
+      var li = link.parentElement;
+      li.classList.toggle('open');
+    });
+  });
+</script>

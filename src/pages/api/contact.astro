@@ -1,0 +1,94 @@
+---
+export const prerender = false;
+
+if (Astro.request.method !== 'POST') {
+  return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), {
+    status: 405, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+const data = await Astro.request.formData();
+const name    = data.get('name')?.toString().trim() ?? '';
+const email   = data.get('email')?.toString().trim() ?? '';
+const phone   = data.get('phone')?.toString().trim() ?? '';
+const message = data.get('message')?.toString().trim() ?? '';
+
+if (!name || !email || !message) {
+  return new Response(JSON.stringify({ success: false, error: 'Missing required fields.' }), {
+    status: 400, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+const apiKey = import.meta.env.BREVO_API_KEY ?? process.env.BREVO_API_KEY;
+if (!apiKey) {
+  return new Response(JSON.stringify({ success: false, error: 'Server misconfiguration.' }), {
+    status: 500, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+const notifyHtml = `
+  <h2>New Contact Form Submission</h2>
+  <table cellpadding="8" style="border-collapse:collapse;font-family:sans-serif;">
+    <tr><td><strong>Name</strong></td><td>${name}</td></tr>
+    <tr><td><strong>Email</strong></td><td><a href="mailto:${email}">${email}</a></td></tr>
+    <tr><td><strong>Phone</strong></td><td>${phone || '—'}</td></tr>
+    <tr><td><strong>Message</strong></td><td style="white-space:pre-wrap">${message}</td></tr>
+  </table>
+`;
+
+const thankYouHtml = `
+  <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#222;">
+    <h2 style="color:#1a1a2e;">Thanks for reaching out, ${name}!</h2>
+    <p>We received your message and will get back to you as soon as possible — typically within 1 business day.</p>
+    <blockquote style="border-left:3px solid #e63946;margin:1rem 0;padding:0.5rem 1rem;color:#555;white-space:pre-wrap">${message}</blockquote>
+    <p>— The Cedar Rapids Web Design Team<br><a href="https://cedarrapidswebdesign.com">cedarrapidswebdesign.com</a></p>
+  </div>
+`;
+
+const sendEmail = async (to, subject, htmlContent, replyTo) => {
+  const body = {
+    sender: { name: 'Cedar Rapids Web Design', email: 'james@cedarrapidswebdesign.com' },
+    to: [to], subject, htmlContent,
+    ...(replyTo ? { replyTo } : {}),
+  };
+  return fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+};
+
+try {
+  const [notifyRes, thankYouRes] = await Promise.all([
+    sendEmail(
+      { email: 'james@cedarrapidswebdesign.com', name: 'James Welbes' },
+      `New inquiry from ${name}`,
+      notifyHtml,
+      { email, name }
+    ),
+    sendEmail(
+      { email, name },
+      `Thanks for reaching out, ${name}!`,
+      thankYouHtml,
+      { email: 'james@cedarrapidswebdesign.com', name: 'Cedar Rapids Web Design' }
+    ),
+  ]);
+
+  if (!notifyRes.ok || !thankYouRes.ok) {
+    const err = await notifyRes.text();
+    console.error('Brevo error:', err);
+    return new Response(JSON.stringify({ success: false, error: 'Failed to send email.' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+} catch (err) {
+  console.error('Contact form error:', err);
+  return new Response(JSON.stringify({ success: false, error: 'Failed to send email.' }), {
+    status: 500, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+return new Response(JSON.stringify({ success: true }), {
+  status: 200, headers: { 'Content-Type': 'application/json' },
+});
+---

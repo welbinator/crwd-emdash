@@ -1,0 +1,705 @@
+{
+	"$schema": "https://emdashcms.com/seed.schema.json",
+	"version": "1",
+	"meta": {
+		"name": "Cedar Rapids Web Design",
+		"description": "Cedar Rapids Web Design website",
+		"author": "James Welbes"
+	},
+	"settings": {
+		"title": "Cedar Rapids Web Design",
+		"tagline": "Professional web design and development in Cedar Rapids, Iowa",
+		"phone": "319.360.5541",
+		"email": "hello@cedarrapidswebdesign.com"
+	},
+	"collections": [
+		{
+			"slug": "portfolio",
+			"label": "Portfolio",
+			"labelSingular": "Portfolio Item",
+			"supports": [
+				"drafts"
+			],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Project Name",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "url",
+					"label": "Website URL",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "screenshot",
+					"label": "Screenshot",
+					"type": "image"
+				},
+				{
+					"slug": "order",
+					"label": "Display Order",
+					"type": "number"
+				}
+			]
+		},
+		{
+			"slug": "team_members",
+			"label": "Team Members",
+			"labelSingular": "Team Member",
+			"supports": [
+				"drafts"
+			],
+			"fields": [
+				{
+					"slug": "name",
+					"label": "Name",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "title",
+					"label": "Job Title",
+					"type": "string"
+				},
+				{
+					"slug": "photo",
+					"label": "Photo",
+					"type": "image"
+				},
+				{
+					"slug": "bio",
+					"label": "Bio",
+					"type": "portableText"
+				},
+				{
+					"slug": "twitter_url",
+					"label": "Twitter / X URL",
+					"type": "string"
+				},
+				{
+					"slug": "linkedin_url",
+					"label": "LinkedIn URL",
+					"type": "string"
+				},
+				{
+					"slug": "facebook_url",
+					"label": "Facebook URL",
+					"type": "string"
+				},
+				{
+					"slug": "order",
+					"label": "Display Order",
+					"type": "number"
+				}
+			]
+		},
+		{
+			"slug": "services",
+			"label": "Services",
+			"labelSingular": "Service",
+			"supports": [
+				"drafts"
+			],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Service Title",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "description",
+					"label": "Description",
+					"type": "text"
+				},
+				{
+					"slug": "icon",
+					"label": "Icon (SVG path data)",
+					"type": "string"
+				},
+				{
+					"slug": "order",
+					"label": "Display Order",
+					"type": "number"
+				}
+			]
+		},
+		{
+			"slug": "slides",
+			"label": "Slides",
+			"labelSingular": "Slide",
+			"supports": [
+				"drafts"
+			],
+			"fields": [
+				{
+					"slug": "heading",
+					"label": "Heading",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "body",
+					"label": "Body Text",
+					"type": "text"
+				},
+				{
+					"slug": "cta_label",
+					"label": "Button Label",
+					"type": "string"
+				},
+				{
+					"slug": "cta_url",
+					"label": "Button URL",
+					"type": "string"
+				},
+				{
+					"slug": "video_file",
+					"label": "Background Video Filename (in /assets/video/)",
+					"type": "string"
+				},
+				{
+					"slug": "overlay",
+					"label": "Overlay Style (dark / light / none)",
+					"type": "string"
+				},
+				{
+					"slug": "text_color",
+					"label": "Text Color (light / dark)",
+					"type": "string"
+				},
+				{
+					"slug": "anchor",
+					"label": "Section ID / Anchor",
+					"type": "string"
+				},
+				{
+					"slug": "order",
+					"label": "Display Order",
+					"type": "number"
+				}
+			]
+		}
+	],
+	"taxonomies": [],
+	"bylines": [
+		{
+			"id": "byline-james",
+			"slug": "james-welbes",
+			"displayName": "James Welbes"
+		}
+	],
+	"menus": [
+		{
+			"name": "primary",
+			"label": "Primary Navigation",
+			"items": [
+				{
+					"type": "custom",
+					"label": "Home",
+					"url": "#hero"
+				},
+				{
+					"type": "custom",
+					"label": "Services",
+					"url": "#services"
+				},
+				{
+					"type": "custom",
+					"label": "Portfolio",
+					"url": "#portfolio"
+				},
+				{
+					"type": "custom",
+					"label": "Team",
+					"url": "#team"
+				},
+				{
+					"type": "custom",
+					"label": "Contact Us",
+					"url": "#contact-us"
+				}
+			]
+		}
+	],
+	"sections": [
+		{
+			"slug": "slide-consultation",
+			"title": "Slide: Free Consultation",
+			"description": "Content for the Free Consultation video slide",
+			"source": "theme",
+			"content": [
+				{
+					"_type": "block",
+					"style": "h2",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Free Consultation"
+						}
+					]
+				},
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Not sure where to start? Let's talk. We'll listen to your goals and suggest the right approach \u2014 no pressure, no jargon."
+						}
+					]
+				}
+			]
+		},
+		{
+			"slug": "slide-mobile-friendly",
+			"title": "Slide: Mobile Friendly",
+			"description": "Content for the Mobile Friendly video slide",
+			"source": "theme",
+			"content": [
+				{
+					"_type": "block",
+					"style": "h2",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Mobile Friendly"
+						}
+					]
+				},
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Over 60% of web traffic comes from mobile devices. We build sites that look and work great on every screen size."
+						}
+					]
+				}
+			]
+		},
+		{
+			"slug": "slide-seo",
+			"title": "Slide: SEO Optimized",
+			"description": "Content for the SEO video slide",
+			"source": "theme",
+			"content": [
+				{
+					"_type": "block",
+					"style": "h2",
+					"children": [
+						{
+							"_type": "span",
+							"text": "SEO Optimized"
+						}
+					]
+				},
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Built for search from day one. Fast load times, clean markup, and structured data so Google can find and rank your site."
+						}
+					]
+				}
+			]
+		},
+		{
+			"slug": "slide-services",
+			"title": "Slide: Services Header",
+			"description": "Heading and intro for the services slide",
+			"source": "theme",
+			"content": [
+				{
+					"_type": "block",
+					"style": "h2",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Services"
+						}
+					]
+				},
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Everything you need to get online and stay there."
+						}
+					]
+				}
+			]
+		},
+		{
+			"slug": "slide-contact",
+			"title": "Slide: Contact Us",
+			"description": "Intro text for the contact slide",
+			"source": "theme",
+			"content": [
+				{
+					"_type": "block",
+					"style": "h2",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Contact Us"
+						}
+					]
+				},
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Ready to get started? Tell us about your project."
+						}
+					]
+				},
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "The more details you provide, the more accurate our estimate will be."
+						}
+					]
+				}
+			]
+		}
+	],
+	"widgetAreas": [],
+	"content": {
+		"portfolio": [
+			{
+				"status": "published",
+				"data": {
+					"title": "West Side Sewing",
+					"url": "https://westsidesewing.com",
+					"order": 1,
+					"screenshot": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/westsidesewing.webp",
+							"alt": "West Side Sewing website screenshot"
+						}
+					}
+				},
+				"id": "portfolio-westside",
+				"slug": "portfolio-westside"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "The Space Coworking",
+					"url": "https://cedarrapidscoworking.space",
+					"order": 2,
+					"screenshot": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/thespace.webp",
+							"alt": "The Space Coworking website screenshot"
+						}
+					}
+				},
+				"id": "portfolio-thespace",
+				"slug": "portfolio-thespace"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "RoadMapWP",
+					"url": "https://roadmapwp.com",
+					"order": 3,
+					"screenshot": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/roadmapwp.webp",
+							"alt": "RoadMapWP website screenshot"
+						}
+					}
+				},
+				"id": "portfolio-roadmapwp",
+				"slug": "portfolio-roadmapwp"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "The Repo",
+					"url": "https://therepo.org",
+					"order": 4,
+					"screenshot": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/thereposcreenshot.webp",
+							"alt": "The Repo website screenshot"
+						}
+					}
+				},
+				"id": "portfolio-therepo",
+				"slug": "portfolio-therepo"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "FinnPREP",
+					"url": "https://finnprep.com",
+					"order": 5,
+					"screenshot": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/finnprep-hero.webp",
+							"alt": "FinnPREP website screenshot"
+						}
+					}
+				},
+				"id": "portfolio-finnprep",
+				"slug": "portfolio-finnprep"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "Chromebook Guide",
+					"url": "https://chromebook.guide",
+					"order": 6,
+					"screenshot": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/Cedar-Rapids-Web-Design_Portfolio_Chromebook-Guide1.webp",
+							"alt": "Chromebook Guide website screenshot"
+						}
+					}
+				},
+				"id": "portfolio-chromebook",
+				"slug": "portfolio-chromebook"
+			}
+		],
+		"team_members": [
+			{
+				"status": "published",
+				"data": {
+					"name": "Devin Green",
+					"title": "Lead Designer",
+					"order": 1,
+					"twitter_url": "https://twitter.com/artistro08",
+					"facebook_url": "https://www.facebook.com/artistro08",
+					"photo": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/devingreen_profile-100x100-1.webp",
+							"alt": "Devin Green"
+						}
+					},
+					"bio": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Devin loves graphic and web design. With over 11 years experience in graphic design and 7 years in web design, his preferred tools are Adobe Photoshop, Illustrator, and Webflow."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "When he's not designing, Devin works on his clothing line Style Clothing Co."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Check out Devin's work at devingreen.me"
+								}
+							]
+						}
+					]
+				},
+				"id": "team-devin",
+				"slug": "team-devin"
+			},
+			{
+				"status": "published",
+				"data": {
+					"name": "James Welbes",
+					"title": "Owner / Lead Developer",
+					"order": 2,
+					"twitter_url": "https://twitter.com/jameswelbes",
+					"linkedin_url": "https://linkedin.com/in/JamesWelbes",
+					"photo": {
+						"$media": {
+							"url": "https://cedarrapidswebdesign.com/assets/images/Cedar-Rapids-Web-Design_James-Welbes_profile-100x100-1.webp",
+							"alt": "James Welbes"
+						}
+					},
+					"bio": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "James has been building websites since he was 13. Mostly WordPress, but he dabbles in Webflow, October CMS, and good old fashioned code."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Whatever you need done, James can do it. And if he can't, he'll figure it out."
+								}
+							]
+						}
+					]
+				},
+				"id": "team-james",
+				"slug": "team-james"
+			}
+		],
+		"services": [
+			{
+				"status": "published",
+				"data": {
+					"title": "Web Development",
+					"description": "We build fast, reliable, and scalable websites from the ground up. From marketing sites to complex web applications, our code is built to perform and last.",
+					"order": 1
+				},
+				"id": "service-webdev",
+				"slug": "service-webdev"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "UI/UX Design",
+					"description": "User-centered design that balances aesthetics with usability. We create interfaces that are intuitive, accessible, and aligned with your brand identity.",
+					"order": 2
+				},
+				"id": "service-uiux",
+				"slug": "service-uiux"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "E-Commerce Solutions",
+					"description": "Online stores built for conversion. We handle product catalogs, payment integration, inventory management, and everything in between.",
+					"order": 3
+				},
+				"id": "service-ecommerce",
+				"slug": "service-ecommerce"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "Hosting & Maintenance",
+					"description": "Reliable hosting infrastructure with proactive monitoring, regular updates, and performance optimization to keep your site running smoothly.",
+					"order": 4
+				},
+				"id": "service-hosting",
+				"slug": "service-hosting"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "SEO & Performance",
+					"description": "Technical SEO audits, page speed optimization, and structured data implementation to ensure your site ranks well and loads fast.",
+					"order": 5
+				},
+				"id": "service-seo",
+				"slug": "service-seo"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "Responsive Design",
+					"description": "Pixel-perfect experiences across every device and screen size. We ensure your site looks and works great on desktop, tablet, and mobile.",
+					"order": 6
+				},
+				"id": "service-responsive",
+				"slug": "service-responsive"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "Analytics & Reporting",
+					"description": "Data-driven insights to understand your users. We set up tracking, dashboards, and reporting so you can make informed decisions.",
+					"order": 7
+				},
+				"id": "service-analytics",
+				"slug": "service-analytics"
+			},
+			{
+				"status": "published",
+				"data": {
+					"title": "Security & Compliance",
+					"description": "Protection against vulnerabilities with SSL certificates, security audits, GDPR compliance, and regular backup systems.",
+					"order": 8
+				},
+				"id": "service-security",
+				"slug": "service-security"
+			}
+		],
+		"slides": [
+			{
+				"id": "slide-consultation",
+				"slug": "slide-consultation",
+				"status": "published",
+				"data": {
+					"heading": "Free Consultation",
+					"body": "Not sure where to start? Let's talk. We'll listen to your goals and suggest the right approach \u2014 no pressure, no jargon.",
+					"cta_label": "Get Started",
+					"cta_url": "#contact-us",
+					"video_file": "Cedar-Rapids-Web-Design_Free-Consultation.mp4",
+					"overlay": "dark",
+					"text_color": "light",
+					"anchor": "consultation",
+					"order": 1
+				}
+			},
+			{
+				"id": "slide-mobile-friendly",
+				"slug": "slide-mobile-friendly",
+				"status": "published",
+				"data": {
+					"heading": "Mobile Friendly",
+					"body": "Over 60% of web traffic comes from mobile devices. We build sites that look and work great on every screen size.",
+					"cta_label": "Learn More",
+					"cta_url": "#contact-us",
+					"video_file": "Cedar-Rapids-Web-Design_Mobile-Friendly.mp4",
+					"overlay": "dark",
+					"text_color": "light",
+					"anchor": "mobile-friendly",
+					"order": 2
+				}
+			},
+			{
+				"id": "slide-seo",
+				"slug": "slide-seo",
+				"status": "published",
+				"data": {
+					"heading": "SEO Optimized",
+					"body": "Built for search from day one. Fast load times, clean markup, and structured data so Google can find and rank your site.",
+					"cta_label": "Get Found Online",
+					"cta_url": "#contact-us",
+					"video_file": "Cedar-Rapids-Web-Design_SEO-Video-Background.mp4",
+					"overlay": "light",
+					"text_color": "dark",
+					"anchor": "seo",
+					"order": 3
+				}
+			}
+		]
+	}
+}
