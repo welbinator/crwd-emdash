@@ -29,6 +29,48 @@ const serviceItems = [...(serviceEntries ?? [])].sort((a: any, b: any) => (a.dat
 const { entries: slideEntries } = await getEmDashCollection("slides", { status: "published", limit: 20 });
 const videoSlides = [...(slideEntries ?? [])].sort((a: any, b: any) => (a.data?.order ?? 99) - (b.data?.order ?? 99));
 
+// Markdown for Agents — return markdown when Accept: text/markdown is requested
+const acceptHeader = Astro.request.headers.get('accept') ?? '';
+if (acceptHeader.includes('text/markdown')) {
+  const serviceList = serviceItems.map((s: any) => `- ${s.data?.title ?? ''}`).join('\n');
+  const portfolioList = portfolioItems.map((p: any) => `- [${p.data?.title ?? ''}](${p.data?.url ?? '#'})`).join('\n');
+  const md = [
+    `# ${(settings as any)?.title ?? 'Cedar Rapids Web Design'}`,
+    '',
+    `> ${(settings as any)?.tagline ?? 'Professional web design and development services in Cedar Rapids, Iowa.'}`,
+    '',
+    '## Services',
+    '',
+    serviceList || '- Custom WordPress website design\n- Performance optimization\n- SEO-ready development\n- Mobile-friendly, responsive design',
+    '',
+    '## Portfolio',
+    '',
+    portfolioList || '- Recent client work available at https://cedarrapidswebdesign.com/#portfolio',
+    '',
+    '## About',
+    '',
+    'Cedar Rapids Web Design is run by James Welbes, a web developer specializing in custom WordPress websites for small businesses in Cedar Rapids, Iowa and surrounding areas.',
+    '',
+    '## Contact',
+    '',
+    `- Email: ${email}`,
+    `- Phone: ${phone}`,
+    '- Contact form: https://cedarrapidswebdesign.com/#contact',
+    '',
+    '## More Information',
+    '',
+    '- Full site: https://cedarrapidswebdesign.com',
+    '- Plain-text description: https://cedarrapidswebdesign.com/llms.txt',
+  ].join('\n');
+  return new Response(md, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Vary': 'Accept',
+    },
+  });
+}
+
 // Page context for EmDash live editing toolbar
 const page = createPublicPageContext({
   Astro,

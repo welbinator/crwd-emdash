@@ -1,0 +1,28 @@
+# Cedar Rapids Web Design
+
+> Professional web design and development services based in Cedar Rapids, Iowa.
+
+## About
+
+Cedar Rapids Web Design is run by James Welbes, a web developer specializing in custom WordPress websites, performance-focused web design, and SEO-ready sites for small businesses in Cedar Rapids and the surrounding area.
+
+## Services
+
+- Custom WordPress website design and development
+- Website redesigns and rebuilds
+- Performance optimization and Core Web Vitals improvement
+- SEO-friendly markup and site structure
+- Contact form setup and email integration
+- Mobile-friendly, responsive design
+
+## Who We Help
+
+Small businesses, local service providers, and entrepreneurs in Cedar Rapids, Iowa and surrounding areas who need a professional web presence.
+
+## Contact
+
+To hire James or request a free consultation, fill out the contact form at https://cedarrapidswebdesign.com or email james@cedarrapidswebdesign.com
+
+## Technology
+
+Sites are built using WordPress with Automatic CSS and Etch for maintainable, scalable code. Hosting recommendations provided on request.

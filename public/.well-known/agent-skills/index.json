@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agentskills.io/schema/v0.2.0/index.json",
+  "name": "Cedar Rapids Web Design",
+  "url": "https://cedarrapidswebdesign.com",
+  "skills": [
+    {
+      "name": "contact",
+      "type": "form",
+      "description": "Submit a contact or consultation request to Cedar Rapids Web Design. The form accepts name, email, phone, and message fields.",
+      "url": "https://cedarrapidswebdesign.com/#contact"
+    },
+    {
+      "name": "business-info",
+      "type": "document",
+      "description": "Plain-text description of Cedar Rapids Web Design services, target clients, and contact information for AI agent consumption.",
+      "url": "https://cedarrapidswebdesign.com/llms.txt"
+    }
+  ]
+}
