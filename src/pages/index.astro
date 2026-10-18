@@ -53,8 +53,6 @@ if (acceptHeader.includes('text/markdown')) {
     '',
     '## Contact',
     '',
-    `- Email: ${email}`,
-    `- Phone: ${phone}`,
     '- Contact form: https://cedarrapidswebdesign.com/#contact',
     '',
     '## More Information',
@@ -323,7 +321,6 @@ const SLIDE_IDS = ['hero', ...videoSlides.map((s: any) => s.data?.anchor ?? s.sl
       <div class="slide__content slide__content--contact">
         <div class="contact-text">
           <Fragment set:html={renderPT(sectionContact?.content ?? [])} />
-          <a href={phoneUrl} class="contact__phone">{phone}</a>
         </div>
         <form class="contact-form" id="contactForm">
           <div class="form-row">
@@ -350,12 +347,12 @@ const SLIDE_IDS = ['hero', ...videoSlides.map((s: any) => s.data?.anchor ?? s.sl
           </div>
           <button type="submit" class="btn btn--solid" id="contactSubmit">Send Message</button>
           <p id="contactSuccess" style="display:none;color:#4caf50;margin-top:0.75rem;font-weight:600;">✓ Message sent! We'll be in touch soon.</p>
-          <p id="contactError" style="display:none;color:#e63946;margin-top:0.75rem;font-weight:600;">Something went wrong. Please try again or email us directly.</p>
+          <p id="contactError" style="display:none;color:#e63946;margin-top:0.75rem;font-weight:600;">Something went wrong. Please try again in a moment.</p>
         </form>
       </div>
       <div class="contact-footer-bar">
         <span>© 2026 {(settings as any)?.title ?? 'Cedar Rapids Web Design'} · Cedar Rapids, Iowa</span>
-        <span><a href={phoneUrl}>{phone}</a> · <a href={`mailto:${email}`}>{email}</a></span>
+        <span><a href="#contact-us">Get in touch via the contact form</a></span>
       </div>
     </section>
 
