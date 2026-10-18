@@ -25,7 +25,9 @@ export default defineConfig({
 					from: { email: "james@cedarrapidswebdesign.com", name: "Cedar Rapids Web Design" },
 					replyTo: "james@cedarrapidswebdesign.com",
 				}),
-				formsPlugin(),
+				formsPlugin({
+					defaultSpamProtection: "honeypot",
+				}),
 			],
 		}),
 	],
