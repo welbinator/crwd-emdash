@@ -1,0 +1,32 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "crwd-emdash",
+	"main": "./src/worker.ts",
+	"compatibility_date": "2026-02-24",
+	"compatibility_flags": ["nodejs_compat"],
+	"vars": {
+		"EMDASH_SITE_URL": "https://cedarrapidswebdesign.com"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "crwd-emdash",
+			"database_id": "dd6a9bc2-0bb4-401b-804a-e663c3a732c5"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "crwd-emdash-media"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "880a92e8526147edabdd7365b07dc1d1"
+		}
+	],
+	"triggers": {
+		"crons": ["* * * * *"]
+	}
+}

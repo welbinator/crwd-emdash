@@ -1,31 +1,33 @@
-import node from "@astrojs/node";
+import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
+import { d1, r2 } from "@emdash-cms/cloudflare";
 import { formsPlugin } from "@emdash-cms/plugin-forms";
-import { webhookNotifierPlugin } from "@emdash-cms/plugin-webhook-notifier";
 import { defineConfig } from "astro/config";
-import emdash, { local } from "emdash/astro";
-import { sqlite } from "emdash/db";
+import emdash from "emdash/astro";
+import { brevoEmail } from "./src/plugins/brevo-email/index.ts";
 
 export default defineConfig({
 	output: "server",
-	devToolbar: { enabled: false },
-	adapter: node({ mode: "standalone" }),
-	security: {
-		checkOrigin: false,
-		allowedDomains: [
-			{ hostname: "cedarrapidswebdesign.com", protocol: "https" },
-			{ hostname: "www.cedarrapidswebdesign.com", protocol: "https" },
-		],
+	site: "https://cedarrapidswebdesign.com",
+	adapter: cloudflare(),
+	image: {
+		layout: "constrained",
+		responsiveStyles: true,
 	},
 	integrations: [
 		react(),
 		emdash({
-			database: sqlite({ url: "file:./data.db" }),
-			storage: local({
-				directory: "./uploads",
-				baseUrl: "/_emdash/api/media/file",
-			}),
-			routes: [formsPlugin(), webhookNotifierPlugin()],
+			siteUrl: "https://cedarrapidswebdesign.com",
+			database: d1({ binding: "DB", session: "auto" }),
+			storage: r2({ binding: "MEDIA" }),
+			plugins: [
+				brevoEmail({
+					from: { email: "james@cedarrapidswebdesign.com", name: "Cedar Rapids Web Design" },
+					replyTo: "james@cedarrapidswebdesign.com",
+				}),
+				formsPlugin(),
+			],
 		}),
 	],
+	devToolbar: { enabled: false },
 });
